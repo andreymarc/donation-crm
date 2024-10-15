@@ -1,15 +1,30 @@
-// Import required dependencies 
 const express = require('express');
-
 const mongoose = require('mongoose');
-require('dotenv').config(); // Load environment variables from .env file
-const bodyParser = require('body-parser');
-const { check, validationResult } = require('express-validator');
+const cors = require('cors');
+require('dotenv').config();
 
-// Initialize Express
 const app = express();
 const PORT = process.env.PORT || 3000;
-app.use(bodyParser.json());
+
+// Apply CORS middleware with custom origin logic
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow requests with no origin, such as curl or mobile apps
+      if (!origin) return callback(null, true);
+      
+      // Define allowed origins
+      if (['http://localhost:3000', 'http://mydomain.com'].indexOf(origin) === -1) {
+        var msg = "The CORS policy for this site does not allow access from the specified origin.";
+        return callback(new Error(msg), false);
+      }
+      return callback(null, true);
+    },
+  })
+);
+
+// Middleware to parse JSON requests
+app.use(express.json());
 
 // MongoDB connection string from environment variable
 const uri = process.env.MONGO_URI;
@@ -21,23 +36,19 @@ mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
 
 // Define Donation Schema and Model
 const donationSchema = new mongoose.Schema({
-    donorName: { type: String, required: true },
-    email: { type: String, required: true }, // added email field
-    amount: { type: Number, required: true },
-    paymentMethod: { type: String, required: true }, // added paymentMethod field
-    date: { type: Date, default: Date.now }
+  donorName: { type: String, required: true },
+  email: { type: String, required: true },
+  amount: { type: Number, required: true },
+  paymentMethod: { type: String, required: true },
+  date: { type: Date, default: Date.now }
 });
 
 const Donation = mongoose.model('Donation', donationSchema);
 
 // Define a simple route for root URL
-
 app.get('/', (req, res) => {
   res.send('Welcome to the Donation CRM API');
 });
-
-// Middleware to parse JSON requests
-app.use(express.json());
 
 // GET route to Fetch Donations
 app.get('/donations', async (req, res) => {
@@ -83,7 +94,7 @@ app.post('/donations',
     }
   });
 
-// Start the server 
+// Start the server
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
 });

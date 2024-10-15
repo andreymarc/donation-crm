@@ -6,6 +6,7 @@ const AddDonation = () => {
   const [email, setEmail] = useState('');
   const [amount, setAmount] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('');
+  const [message, setMessage] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -15,58 +16,71 @@ const AddDonation = () => {
         donorName,
         email,
         amount,
-        paymentMethod
+        paymentMethod,
       });
-      console.log('Donation added:', response.data);
-      alert('Donation successfully added');
+      setMessage('Donation added successfully!');
+      setDonorName('');
+      setEmail('');
+      setAmount('');
+      setPaymentMethod('');
     } catch (error) {
-      console.error('Error adding donation:', error);
-      alert('Failed to add donation');
+      setMessage('Failed to add donation');
     }
   };
 
   return (
-    <div>
-      <h2>Add a Donation</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Donor Name:</label>
-          <input
-            type="text"
-            value={donorName}
-            onChange={(e) => setDonorName(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>Email:</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>Amount:</label>
-          <input
-            type="number"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>Payment Method:</label>
-          <input
-            type="text"
-            value={paymentMethod}
-            onChange={(e) => setPaymentMethod(e.target.value)}
-            required
-          />
-        </div>
-        <button type="submit">Add Donation</button>
-      </form>
+    <div className="card">
+      <div className="card-body">
+        <h4 className="card-title">Add a Donation</h4>
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="donorName">Donor Name</label>
+            <input
+              type="text"
+              className="form-control"
+              id="donorName"
+              value={donorName}
+              onChange={(e) => setDonorName(e.target.value)}
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="email">Email</label>
+            <input
+              type="email"
+              className="form-control"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="amount">Amount</label>
+            <input
+              type="number"
+              className="form-control"
+              id="amount"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="paymentMethod">Payment Method</label>
+            <select
+              className="form-control"
+              id="paymentMethod"
+              value={paymentMethod}
+              onChange={(e) => setPaymentMethod(e.target.value)}
+            >
+              <option value="">Select Payment Method</option>
+              <option value="Credit Card">Credit Card</option>
+              <option value="PayPal">PayPal</option>
+              <option value="Bank Transfer">Bank Transfer</option>
+            </select>
+          </div>
+          <button type="submit" className="btn btn-primary mt-3">Add Donation</button>
+        </form>
+        {message && <p className="mt-3">{message}</p>}
+      </div>
     </div>
   );
 };

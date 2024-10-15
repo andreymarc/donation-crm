@@ -3,28 +3,32 @@ import axios from 'axios';
 
 const Donations = () => {
   const [donations, setDonations] = useState([]);
+  const [error, setError] = useState(null);
 
-  // Fetch donations from the backend
   useEffect(() => {
-    axios.get('http://localhost:3000/donations')
+    axios.get('http://localhost:3000/api/donations')
       .then(response => {
         setDonations(response.data);
       })
       .catch(error => {
         console.error('Error fetching donations:', error);
+        setError(error.message);
       });
   }, []);
 
   return (
-    <div>
-      <h1>Donations</h1>
-      <ul>
-        {donations.map(donation => (
-          <li key={donation._id}>
-            {donation.donorName} donated ${donation.amount} via {donation.paymentMethod}
-          </li>
-        ))}
-      </ul>
+    <div className="card">
+      <div className="card-body">
+        <h4 className="card-title">Donations</h4>
+        {error && <div className="alert alert-danger">Failed to load donations: {error}</div>}
+        <ul className="list-group">
+          {donations.map(donation => (
+            <li key={donation._id} className="list-group-item">
+              <strong>{donation.donorName}</strong> donated <strong>${donation.amount}</strong> via {donation.paymentMethod}
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 };
