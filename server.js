@@ -1,36 +1,21 @@
+// server.js
 const express = require('express');
 const mongoose = require('mongoose');
-const cors = require('cors');
-require('dotenv').config();
+require('dotenv').config(); // Load environment variables
+const bodyParser = require('body-parser');
+const { check, validationResult } = require('express-validator'); // Imported express-validator
 
+// Import Routes
+const authRoutes = require('./routes/auth');
+const donationRoutes = require('./routes/donations'); // Ensure this is lowercase if the file is named `donations.js`
+
+// Initialize Express
 const app = express();
 const PORT = process.env.PORT || 3000;
+app.use(bodyParser.json());
 
-// Apply CORS middleware with custom origin logic
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      // Allow requests with no origin, such as curl or mobile apps
-      if (!origin) return callback(null, true);
-      
-      // Define allowed origins
-      if (['http://localhost:3000', 'http://mydomain.com'].indexOf(origin) === -1) {
-        var msg = "The CORS policy for this site does not allow access from the specified origin.";
-        return callback(new Error(msg), false);
-      }
-      return callback(null, true);
-    },
-  })
-);
-
-// Middleware to parse JSON requests
-app.use(express.json());
-
-// MongoDB connection string from environment variable
-const uri = process.env.MONGO_URI;
-
-// Connect to MongoDB using Mongoose
-mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
+// MongoDB connection
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Mongoose connected successfully'))
   .catch(err => console.error('Mongoose connection error:', err));
 
@@ -43,9 +28,14 @@ const donationSchema = new mongoose.Schema({
   date: { type: Date, default: Date.now }
 });
 
-const Donation = mongoose.model('Donation', donationSchema);
+// Ensure the Donation model is only compiled once
+const Donation = mongoose.models.Donation || mongoose.model('Donation', donationSchema);
 
-// Define a simple route for root URL
+// Routes
+app.use('/api/auth', authRoutes); // Authentication routes
+app.use('/api/donations', donationRoutes); // Donation routes
+
+// Root route
 app.get('/', (req, res) => {
   res.send('Welcome to the Donation CRM API');
 });
@@ -92,7 +82,8 @@ app.post('/donations',
       console.error('Error saving donation:', err);
       res.status(500).json({ error: 'Failed to save donation' });
     }
-  });
+  }
+);
 
 // Start the server
 app.listen(PORT, () => {
